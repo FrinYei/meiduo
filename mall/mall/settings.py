@@ -30,6 +30,16 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
+# 告知django去apps里查找
+import sys
+# sys.path 是一个列表
+sys.path.insert(0,os.path.join(BASE_DIR,'apps'))
+
+
+#让django找到 apps这个包
+sys.path.insert(0,os.path.join(BASE_DIR,'apps'))
+
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -37,6 +47,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # 修改settings 文件中的路径信息
+    'users.apps.UsersConfig',
+    'rest_framework',
+
 ]
 
 MIDDLEWARE = [
@@ -75,8 +89,14 @@ WSGI_APPLICATION = 'mall.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        # 修改为mysql数据库
+        'ENGINE': 'django.db.backends.mysql',
+        'HOST': '127.0.0.1',  # 数据库主机
+        'PORT': 3306,  # 数据库端口
+        'USER': 'root',  # 数据库用户名
+        'PASSWORD': 'mysql',  # 数据库用户密码
+        # 在数据库中创建相应的数据库
+        'NAME': 'meiduo_mall_34'  # 数据库名字
     }
 }
 
@@ -103,9 +123,13 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
+# LANGUAGE_CODE = 'en-us'
+#
+# TIME_ZONE = 'UTC'
+# 语言
+LANGUAGE_CODE = 'zh-Hans'
+# 时区
+TIME_ZONE = 'Asia/Shanghai'
 
 USE_I18N = True
 
@@ -118,3 +142,64 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# 配置redis
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/0",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    },
+    "session": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "session"
+
+# 配置日志
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(lineno)d %(message)s'
+        },
+        'simple': {
+            'format': '%(levelname)s %(module)s %(lineno)d %(message)s'
+        },
+    },
+    'filters': {
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        },
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, "logs/meiduo.log"),  # 日志文件的位置
+            'maxBytes': 300 * 1024 * 1024,
+            'backupCount': 10,
+            'formatter': 'verbose'
+        },
+    },
+    'loggers': {
+        'django': {  # 定义了一个名为django的日志器
+            'handlers': ['console', 'file'],
+            'propagate': True,
+        },
+    }
+}
