@@ -208,3 +208,8 @@ REST_FRAMEWORK = {
     # 异常处理
     'EXCEPTION_HANDLER': 'utils.exceptions.exception_handler',
 }
+
+
+# 1.我们想要替换系统的User需要通过设置 AUTH_USER_MODEL来实现
+# 2. 子应用.模型类名  只能有一个点(.)
+AUTH_USER_MODEL = 'users.User'
